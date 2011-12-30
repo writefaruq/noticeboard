@@ -174,6 +174,7 @@ INSTALLED_APPS = [
     "about",
     "profiles",
     "admanager",
+    "payment",
 ]
 
 FIXTURE_DIRS = [

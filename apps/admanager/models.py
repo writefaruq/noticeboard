@@ -3,10 +3,14 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from noticeboard.apps.profiles.models import Profile
+#from noticeboard.apps.payment.models import Invoice
 
-###  =============== Step 1: Customer creates an Ad  ================ ###
+###  =============== Ad Publishing stats when  Customer creates an Ad ================ ###
 
 class Customer(models.Model):
+    """
+    Based on User Profile
+    """
     user_profile = models.ForeignKey(Profile)
 
     def __unicode__(self):
@@ -22,6 +26,9 @@ class AdCategory(models.Model):
     description = models.TextField()
     publish_rate = models.DecimalField(max_digits=7, decimal_places=2, default=0,
                                         help_text="GBP per day")
+    class Meta:
+        verbose_name_plural = "Ad Categories"
+
     def __unicode__(self):
         return self.name
 
@@ -48,7 +55,7 @@ class Ad(models.Model):
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=INACTIVE, editable=False)
 
     def __unicode__(self):
-        return self.title
+        return "%s [%s]" %(self.title, self.get_status_display())
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -57,6 +64,10 @@ class Ad(models.Model):
             self.owner = owner
         super(Ad, self).save(*args, **kwargs)
 
+    def go_live(self):
+        self.status = self.LIVE
+        self.save()
+
 class AdStats(models.Model):
     """
     Holds statistics of Ad performance
@@ -64,59 +75,17 @@ class AdStats(models.Model):
     ad = models.ForeignKey(Ad)
     live_from = models.DateTimeField(auto_now=True)
     expired_at = models.DateTimeField()
-    visitor_likes = models.PositiveIntegerField(default=0, help_text="keeps track of Like")
-    vistor_comments = models.PositiveIntegerField(default=0, help_text="keeps track of comments")
+    visitor_likes = models.PositiveIntegerField(default=0, editable=False)
+    vistor_comments = models.PositiveIntegerField(default=0, editable=False)
+
+    class Meta:
+        verbose_name_plural = "Ad Statistics"
 
     def __unicode__(self):
-        return "<%s: Starts:%s Ends:>" %(self.ad, self.live_from, self.expired_at)
+        return "<%s: starts:%s ends:%s>" %(self.ad, self.live_from, self.expired_at)
 
 
-### ================= Step 2: Customer makes a request for publication ======== ###
-
-class PublishRequest(models.Model):
-    """
-    Records a request of publication of an Ad
-    """
-    ad = models.ForeignKey(Ad)
-    start_from = models.DateTimeField()
-    publish_day = models.PositiveIntegerField(help_text="publishing period in days")
-
-    def __unicode__(self):
-        return "%s: dispay %s days" %(self.ad, self.publish_day)
-
-
-### === Step 4: Approved Ads need payment by Customer ======= #####
-
-class PublishFeePayment(models.Model):
-    """
-    Holds the details of payment
-    """
-    ad = models.ForeignKey(Ad)
-    amount_due = models.DecimalField(max_digits=7, decimal_places=2, default=0,
-                                        help_text="publish_rate * publish_day")
-    # should be called publishing charge
-    amount_paid = models.DecimalField(max_digits=7, decimal_places=2, default=0)
-    paid_at = models.DateTimeField(auto_now=True)
-    # derived shortcuts
-    is_full_paid = (amount_paid == amount_due)
-
-    def __unicode__(self):
-        return "%s due: %s" %(self.ad, (self.amount_paid - self.amount_due))
-
-
-    def save(self, *args, **kwargs):
-        if self.is_full_paid:
-            self.ad.status = self.ad.LIVE
-            self.ad.save()
-            adstats = AdStats.object.create(
-                            ad=self.ad,
-                            expired_at=(self.paid_at +
-                                time_delta(day=amount_paid/ad.category.publish_rate))
-                      )
-        super(PublishFeePayment, self).save(*args, **kwargs)
-
-
-### Step 3: Approval manager approves/declines the request for publication  ###
+### After Ad is created Customer makes a request for publication which to be approved by an Admin ###
 
 class ApprovalManager(models.Model):
     """
@@ -129,34 +98,24 @@ class ApprovalManager(models.Model):
         return self.user_profile.user.username
 
 
-class PublishApproval(models.Model):
+class PublishRequest(models.Model):
     """
-    Where pusblish request is signed by an Approval manager
+    Records a request of publication of an Ad
     """
-    publish_request = models.ForeignKey(PublishRequest)
+    ad = models.ForeignKey(Ad)
+    start_from = models.DateTimeField()
+    publish_day = models.PositiveIntegerField(help_text="publishing period in days")
     is_approved = models.BooleanField(default=False)
     notes = models.TextField(blank=True, null=True)
     signed_by = models.ForeignKey(ApprovalManager, editable=False)
     signed_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return "%s: -> Approved" %(self.publish_request.ad)\
-            if self.is_approved else "%s: Awaiting approval" %(self.publish_request.ad)
+        return "%s [Approved]" %(self.ad)\
+            if self.is_approved else "%s [Awaiting approval]" %(self.ad)
 
     def save(self, *args, **kwargs):
         if not self.id:
             profile = Profile.objects.get(pk=1) ## TODO: replace tmporary test
-            signed_by = ApprovalManager.objects.create(user_profile=profile)
-            self.signed_by = signed_by
-            # side effects o approval
-            ad = self.publish_request.ad
-            amount_due = ad.category.publish_rate * self.publish_request.publish_day
-            payment = PublishFeePayment.objects.create(
-                                ad=self.publish_request.ad,
-                                amount_due=amount_due)
-        super(PublishApproval, self).save(*args, **kwargs)
-
-### === Step 5: Paid Ads goes live and shows stats  ======= ###
-
-
-
+            self.signed_by = ApprovalManager.objects.create(user_profile=profile)
+        super(PublishRequest, self).save(*args, **kwargs)

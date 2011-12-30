@@ -1,9 +1,8 @@
 from django.contrib import admin
 
 from noticeboard.apps.admanager.models import (Customer, ApprovalManager, AdCategory, Ad,
-                PublishRequest,PublishApproval, PublishFeePayment, AdStats)
+                PublishRequest, AdStats)
 
 
-for model in (AdCategory, Ad, PublishRequest, PublishApproval,
-            PublishFeePayment, AdStats):
+for model in (AdCategory, Ad, PublishRequest, AdStats):
     admin.site.register(model)
