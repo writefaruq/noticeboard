@@ -1,0 +1,6 @@
+locale
+*.db
+.settings
+*.pyc
+.project
+.pydevproject
