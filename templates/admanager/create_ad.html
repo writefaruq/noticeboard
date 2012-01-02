@@ -1,0 +1,23 @@
+{% extends "admanager/base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Ads" %}{% endblock %}
+
+{% block body %}
+
+     <h2>{% trans "Create your Ad" %}</h2>
+     <form method="post" action="" autocapitalize="off">
+        {% csrf_token %}
+        <fieldset>
+            {{ create_ad_form|as_bootstrap }}
+        </fieldset>
+        <input type="hidden" name="action" value="create"/>
+         <div class="actions">
+             <button type="submit" class="btn primary">{% trans "Create" %}</button>
+        </div>
+    </form>
+
+
+{% endblock %}

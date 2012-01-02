@@ -43,7 +43,7 @@ class Ad(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     last_updated = models.DateTimeField(auto_now_add=True)
     # owner
-    owner = models.ForeignKey(Customer, editable=False)  # who creates this
+    owner = models.ForeignKey(Customer)  # who creates this
     # status
     (INACTIVE, UNDER_REVIEW, LIVE, EXPIRED) = range(4)
     STATUS_CHOICES = (
@@ -57,11 +57,12 @@ class Ad(models.Model):
     def __unicode__(self):
         return "%s [%s]" %(self.title, self.get_status_display())
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            profile = Profile.objects.get(pk=1) ## TODO: replace tmporary test
-            owner = Customer.objects.create(user_profile=profile)
-            self.owner = owner
+    def save(self, user=None, *args, **kwargs):
+        if not self.id and user:
+            profile = Profile.objects.get(user=user) ## TODO: replace tmporary test
+            owner = Customer.objects.get_or_create(user_profile=profile)
+            #import pdb; pdb.set_trace()
+            self.owner = user
         super(Ad, self).save(*args, **kwargs)
 
     def go_live(self):

@@ -1,0 +1,23 @@
+{% extends "admanager/base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Ads" %}{% endblock %}
+
+{% block body %}
+
+     <h2>{% trans "Ad List" %}</h2>
+       <table class="zebra-striped">
+            <thead>  <td>Title </td> <td> Category </td> <td>Description </td> <td>Status </td>
+            </thead>
+            {% for ad in ads %}
+            <tr>  <td>{{ad.title}} </td> <td>{{ad.category}} </td>
+                  <td>{{ad.description}} </td> <td> {{ad.get_status_display}} </td>
+            </tr>
+            {% endfor %}
+       </table>
+
+
+
+{% endblock %}
