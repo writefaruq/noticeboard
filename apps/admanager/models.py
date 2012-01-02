@@ -45,10 +45,11 @@ class Ad(models.Model):
     # owner
     owner = models.ForeignKey(Customer)  # who creates this
     # status
-    (INACTIVE, UNDER_REVIEW, LIVE, EXPIRED) = range(4)
+    (INACTIVE, UNDER_REVIEW, APPROVED, LIVE, EXPIRED) = range(5)
     STATUS_CHOICES = (
                       (INACTIVE, 'Inactive'),  # Not published yet
                       (UNDER_REVIEW, 'Under Review'),  # Not published yet
+                      (APPROVED, 'Approved'),
                       (LIVE, 'Live'),  # Available online
                       (EXPIRED, 'Expired') # publish time is over
                      )
@@ -61,13 +62,21 @@ class Ad(models.Model):
         if not self.id and user:
             profile = Profile.objects.get(user=user) ## TODO: replace tmporary test
             owner = Customer.objects.get_or_create(user_profile=profile)
-            #import pdb; pdb.set_trace()
             self.owner = user
         super(Ad, self).save(*args, **kwargs)
 
     def go_live(self):
         self.status = self.LIVE
         self.save()
+
+    def approve_now(self):
+        self.status = self.APPROVED
+        self.save()
+
+    def sent_for_approval(self):
+        self.status = self.UNDER_REVIEW
+        self.save()
+
 
 class AdStats(models.Model):
     """
@@ -108,7 +117,7 @@ class PublishRequest(models.Model):
     publish_day = models.PositiveIntegerField(help_text="publishing period in days")
     is_approved = models.BooleanField(default=False)
     notes = models.TextField(blank=True, null=True)
-    signed_by = models.ForeignKey(ApprovalManager, editable=False)
+    signed_by = models.ForeignKey(ApprovalManager, blank=True, null=True)
     signed_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
@@ -116,7 +125,10 @@ class PublishRequest(models.Model):
             if self.is_approved else "%s [Awaiting approval]" %(self.ad)
 
     def save(self, *args, **kwargs):
-        if not self.id:
-            profile = Profile.objects.get(pk=1) ## TODO: replace tmporary test
-            self.signed_by = ApprovalManager.objects.create(user_profile=profile)
+        #import pdb; pdb.set_trace()
+        if self.id and self.is_approved: ## object already exists
+            self.ad.approve_now()
+        if not self.id: ## init case
+            #profile = Profile.objects.get(pk=1) ## TODO: replace tmporary test
+            self.signed_by = ApprovalManager.objects.get(pk=1)
         super(PublishRequest, self).save(*args, **kwargs)

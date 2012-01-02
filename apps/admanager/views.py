@@ -40,5 +40,5 @@ def create_ad(request, *args, **kwargs):
     return render_to_response(template_name, RequestContext(request, ctx))
 
 def ad_stats(request):
-    pass
+    return ads(request)
 
