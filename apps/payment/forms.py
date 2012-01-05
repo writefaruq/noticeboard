@@ -27,7 +27,7 @@ class PayInvoiceForm(forms.Form):
         # get the customer, invoice and create an invoice payment
         customer = Customer.objects.filter(user_profile=profile).reverse()[0]
         balance = AccountBalance.objects.filter(customer=customer).reverse()[0]
-        # Fix unlink balance with invoice?
+        # Fix unlink balance with invoice? TODO: link with ad
         invoice = Invoice.objects.filter(customer=customer).reverse()[0]
         # sent for approval
         if self.cleaned_data['pay_now']:

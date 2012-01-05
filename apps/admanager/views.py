@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from noticeboard.apps.admanager.models import Ad
+from noticeboard.apps.admanager.models import Ad, Customer
 from noticeboard.apps.admanager.forms import CreateAdForm
 
 from noticeboard.apps.profiles.models import Profile

@@ -9,11 +9,19 @@
 
      <h2>{% trans "Ad List" %}</h2>
        <table class="zebra-striped">
-            <thead>  <td>Title </td> <td> Category </td> <td>Description </td> <td>Status </td>
+            <thead>  <td>Title </td>
+                    <td> Category </td>
+                    <td>Description </td>
+                    <td>Status </td>
             </thead>
             {% for ad in ads %}
-            <tr>  <td>{{ad.title}} </td> <td>{{ad.category}} </td>
-                  <td>{{ad.description}} </td> <td> {{ad.get_status_display}} </td>
+            <tr>  <td>{{ad.title}} </td>
+                  <td>{{ad.category}} </td>
+                  <td>{{ad.description}} </td>
+                  <td> {{ad.get_status_display}} </td>
+                  {% if ad.status == ad.APPROVED %}
+                  <td> <a href="{{STATIC_ROOT}}{% url payment_pay_invoice %}"> Pay now! </a></td>
+                  {% endif %}
             </tr>
             {% endfor %}
        </table>

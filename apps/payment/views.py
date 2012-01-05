@@ -5,7 +5,7 @@ from django.template import RequestContext
 
 from noticeboard.apps.profiles.models import Profile
 
-from noticeboard.apps.payment.models import AccountBalance
+from noticeboard.apps.payment.models import AccountBalance, Invoice, InvoicePayment
 from noticeboard.apps.payment.forms import PayInvoiceForm
 from noticeboard.apps.admanager.models import Customer
 
@@ -17,14 +17,22 @@ def payments(request):
     else:
         return render_to_response("homepage.html", context)  ## Replace by 404
     account_balance = AccountBalance.objects.get(customer=customer)
+    invoices = Invoice.objects.filter(customer=customer)
+    invoice_payments = InvoicePayment.objects.filter(invoice__in=invoices)
+    paid_invoices = unpaid_invoices = []
+    for ip in invoice_payments:
+        paid_invoices.append(ip.invoice)
+    unpaid_invoices = list(set(invoices) - set(paid_invoices))
     context = {
         "account_balance": account_balance,
+        "paid_invoices": paid_invoices,
+        "unpaid_invoices": unpaid_invoices,
     }
     context = RequestContext(request, context)
     return render_to_response("payment/payments.html", context)
 
 def topup(request):
-    payments(request)
+    return payments(request)
 
 def pay_invoice(request, *args, **kwargs):
     template_name = kwargs.pop("template_name", "payment/pay_invoice.html")

@@ -9,19 +9,47 @@
 
      <h2>{% trans "Account Balance" %}</h2>
        <table class="zebra-striped">
-            <thead>  <td>Current Balance </td> <td> Last Paid</td><td>Action</td></thead>
+            <thead> <td>Current Balance </td><td> Last Paid</td>
+                    <td> Date </td> <td>Action</td></thead>
             <tr> {% if account_balance %}
                     <td>{{account_balance.current_balance}} £ </td>
+                    <td>{{account_balance.last_paid_amount}} £ </td>
                     <td>{{account_balance.last_paid_at}} </td>
-                {% endif %}
-                {% if account_balance.current_balance <= 0 %}
-                    <td> Topup </td>
-                {% else %}
-                    <td> Pay Invoice </td>
-                {% endif %}
+                    <td> <a href="{{STATIC_ROOT}}{% url payment_topup %}"> Topup </a> </td>
+                 {% endif %}
             </tr>
        </table>
 
+       <h2>{% trans "Pay Invoices" %}</h2>
+       <table class="zebra-striped">
+            <thead> <td>Ad </td><td>Approval Date</td>
+                    <td>Amount Due</td><td>Action</td>
+            </thead>
+            {% for invoice in unpaid_invoices %}
+            <tr>
+                <td>{{invoice.publish_request.ad.title}} </td>
+                <td>{{invoice.publish_request.signed_at}} </td>
+                <td>{{invoice.amount}} £ </td>
+                <td> <a href="{{STATIC_ROOT}}{% url payment_pay_invoice %}"> Pay Invoice </a></td>
+             </tr>
+            {% endfor %}
+
+       </table>
+
+    <h2>{% trans "Paid Invoices" %}</h2>
+       <table class="zebra-striped">
+            <thead> <td>Ad </td><td>Approval Date</td>
+                    <td>Amount Due</td>
+            </thead>
+            {% for invoice in paid_invoices %}
+            <tr>
+                    <td>{{invoice.publish_request.ad.title}} </td>
+                    <td>{{invoice.publish_request.signed_at}} </td>
+                    <td>{{invoice.amount}} £ </td>
+            </tr>
+            {% endfor %}
+
+       </table>
 
 
 {% endblock %}
