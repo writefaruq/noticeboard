@@ -2,8 +2,28 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from apps.admanager.models import Ad
-from apps.admanager.forms import CreateAdForm
+from noticeboard.apps.admanager.models import Ad
+from noticeboard.apps.admanager.forms import CreateAdForm
+
+from noticeboard.apps.profiles.models import Profile
+
+def _get_customer(user):
+    try:
+        user_profile = Profile.objects.get(user=user)
+        return Customer.objects.get(user_profile=user_profile)
+    except Exception:
+        raise
+
+def homepage(request):
+    """
+    Shows all live ads of current user
+    """
+    ads = Ad.objects.filter(status=Ad.LIVE)
+    context = {
+        "ads": ads,
+    }
+    context = RequestContext(request, context)
+    return render_to_response("homepage.html", context)
 
 
 @login_required
@@ -11,7 +31,7 @@ def ads(request):
     """
     Lists ads of current user
     """
-    ads = Ad.objects.filter(owner=request.user)
+    ads = Ad.objects.filter(owner=_get_customer(request.user))
     context = {
         "ads": ads,
     }

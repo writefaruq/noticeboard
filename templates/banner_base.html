@@ -12,36 +12,18 @@
             <p><a class="btn primary large">Learn more &raquo;</a></p>
         {% endblock %}
         </div>
-        
+
         <div class="row">
             <div class="span4">
-            {% block column-1 %}
-                <h2>Heading</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed viverra dui. Aenean blandit faucibus tincidunt. Phasellus fermentum elit ut erat varius cursus. Nunc posuere mauris sit amet enim congue quis elementum lectus tincidunt. Cras vel tempus metus.</p>
+            {% for ad in ads %}
+            {% block column-{{ad.id}} %}
+                <h2>{{ad.title}}</h2>
+                <p>{{ad.description}}</p>
                 <p><a class="btn" href="#">View details &raquo;</a></p>
             {% endblock %}
+            {% endfor %}
             </div>
-            <div class="span4">
-            {% block column-2 %}
-                <h2>Heading</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed viverra dui. Aenean blandit faucibus tincidunt. Phasellus fermentum elit ut erat varius cursus. Nunc posuere mauris sit amet enim congue quis elementum lectus tincidunt. Cras vel tempus metus.</p>
-                <p><a class="btn" href="#">View details &raquo;</a></p>
-            {% endblock %}
-            </div>
-            <div class="span4">
-            {% block column-3 %}
-                <h2>Heading</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed viverra dui. Aenean blandit faucibus tincidunt. Phasellus fermentum elit ut erat varius cursus. Nunc posuere mauris sit amet enim congue quis elementum lectus tincidunt. Cras vel tempus metus.</p>
-                <p><a class="btn" href="#">View details &raquo;</a></p>
-            {% endblock %}
-            </div>
-            <div class="span4">
-            {% block column-4 %}
-                <h2>Heading</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed viverra dui. Aenean blandit faucibus tincidunt. Phasellus fermentum elit ut erat varius cursus. Nunc posuere mauris sit amet enim congue quis elementum lectus tincidunt. Cras vel tempus metus.</p>
-                <p><a class="btn" href="#">View details &raquo;</a></p>
-            {% endblock %}
-            </div>
+
         </div>
     </div>
 {% endblock %}
