@@ -18,12 +18,18 @@ class AccountBalance(models.Model):
     def __unicode__(self):
         return "%s: %s GBP" %(self.customer, self.current_balance)
 
+    def save(self, user=None, *args, **kwargs):
+        if not self.id and user:
+            profile = Profile.objects.get(user=user)
+            self.customer = Customer.objects.get_or_create(user_profile=profile)
+        super(AccountBalance, self).save(*args, **kwargs)
+
     def topup(self, amount):
         self.current_balance += amount
         self.save()
 
     def deduct(self, amount):
-        self.current_balance += amount
+        self.current_balance -= amount
         self.save()
 
 ### An Invoice is generated when some service is offered/approved to Customer ###
@@ -35,6 +41,7 @@ class Invoice(models.Model):
     amount = models.DecimalField(max_digits=7, decimal_places=2)
     created_at = models.DateTimeField(auto_now=True)
     publish_request = models.ForeignKey(PublishRequest)
+    customer = models.ForeignKey(Customer)
 
     def __unicode__(self):
         return "%s: pay %s GBP" %(self.publish_request, self.amount)
@@ -54,7 +61,7 @@ class InvoicePayment(models.Model):
     As paid by Customer
     """
     invoice = models.ForeignKey(Invoice)
-    balace = models.ForeignKey(AccountBalance)
+    balace = models.ForeignKey(AccountBalance) ## TODO Fix type
     paid_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):

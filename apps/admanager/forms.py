@@ -6,6 +6,9 @@ from noticeboard.apps.profiles.models import Profile
 from noticeboard.apps.admanager.models import Ad, AdCategory, Customer, PublishRequest
 
 class CreateAdForm(forms.Form):
+    """
+    Need to redirect form after save
+    """
 
     title = forms.CharField(
         label = _("Title"),

@@ -1,0 +1,24 @@
+{% extends "payment/base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Payments" %}{% endblock %}
+
+{% block body %}
+
+     <h2>{% trans "Pay Invoice" %}</h2>
+     <form method="post" action="" autocapitalize="off">
+        {% csrf_token %}
+        <fieldset>
+            {{ pay_invoice_form|as_bootstrap }}
+        </fieldset>
+        <input type="hidden" name="action" value="pay"/>
+         <div class="actions">
+             <button type="submit" class="btn primary">{% trans "Pay" %}</button>
+        </div>
+    </form>
+
+
+
+{% endblock %}

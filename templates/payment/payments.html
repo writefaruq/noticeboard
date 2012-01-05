@@ -1,0 +1,27 @@
+{% extends "payment/base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Payments" %}{% endblock %}
+
+{% block body %}
+
+     <h2>{% trans "Account Balance" %}</h2>
+       <table class="zebra-striped">
+            <thead>  <td>Current Balance </td> <td> Last Paid</td><td>Action</td></thead>
+            <tr> {% if account_balance %}
+                    <td>{{account_balance.current_balance}} £ </td>
+                    <td>{{account_balance.last_paid_at}} </td>
+                {% endif %}
+                {% if account_balance.current_balance <= 0 %}
+                    <td> Topup </td>
+                {% else %}
+                    <td> Pay Invoice </td>
+                {% endif %}
+            </tr>
+       </table>
+
+
+
+{% endblock %}

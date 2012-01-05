@@ -4,5 +4,5 @@ from noticeboard.apps.admanager.models import (Customer, ApprovalManager, AdCate
                 PublishRequest, AdStats)
 
 
-for model in (AdCategory, Ad, PublishRequest, AdStats, Customer):
+for model in (AdCategory, Ad, PublishRequest, AdStats, Customer, ApprovalManager):
     admin.site.register(model)
